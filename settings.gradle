@@ -1,0 +1,8 @@
+rootProject.name = 'DotsAndBoxes'
+
+include 'core'
+include 'swing'
+include 'entries:copy-me-to-get-started'
+include 'entries:followsclosely'
+include 'competition'
+

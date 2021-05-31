@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile(project(':core'))
+    compile(project(':swing'))
+
+
+    testCompile 'junit:junit:4.12'
+    testCompile project(':core').sourceSets.test.output
+}
