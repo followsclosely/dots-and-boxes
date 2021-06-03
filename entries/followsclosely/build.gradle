@@ -1,13 +1,26 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
 
 repositories {
     jcenter()
 }
 
+jar {
+    manifest {
+        attributes "Main-Class": "io.github.followsclosely.SwingLauncher"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
 dependencies {
     compile(project(':core'))
     compile(project(':swing'))
-
 
     testCompile 'junit:junit:4.12'
     testCompile project(':core').sourceSets.test.output

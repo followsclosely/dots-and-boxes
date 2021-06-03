@@ -13,7 +13,7 @@ public class DotsAndBoxesPanel extends JPanel {
 
     private final int DEFAULT_CELL_SIZE = 100;
     private final Dimension DEFAULT_MINIMUM_SIZE;
-    public static final int DOT_DIAMETER = 11;
+    public static final int DOT_DIAMETER = 17;
 
     private static final int barHeight = 5;
 

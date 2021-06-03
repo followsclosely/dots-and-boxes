@@ -91,7 +91,6 @@ public class DefaultBoard implements Board {
             }
         }
 
-        System.out.println(counts);
         return counts;
     }
 }

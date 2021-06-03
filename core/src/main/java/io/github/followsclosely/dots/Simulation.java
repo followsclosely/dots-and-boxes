@@ -12,16 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Simulation {
     private int numberOfGames = 1000000;
 
-    private Map<Integer, AtomicInteger> counts = new HashMap<>() {
-        @Override
-        public AtomicInteger get(Object key) {
-            AtomicInteger value = super.get(key);
-            if (value == null) {
-                super.put((Integer) key, value = new AtomicInteger(0));
-            }
-            return value;
-        }
-    };
+    private Map<Integer, AtomicInteger> counts = new HashMap<>();
 
     private List<ArtificialIntelligence> ais = new ArrayList<>();
 
@@ -56,7 +47,7 @@ public class Simulation {
                 engine.setBoard(board);
             }
             int winner = engine.startGame(i % ais.size());
-            counts.get(winner).getAndIncrement();
+            counts.computeIfAbsent(winner, key -> new AtomicInteger(0)).getAndIncrement();
             System.out.print("\r" + i + "/" + numberOfGames);
 
 //            if( winner == 1) {

@@ -6,7 +6,7 @@ import io.github.followsclosely.dots.impl.DefaultBoard;
 public class SwingLauncher {
     public static void main(String[] args) {
 
-        DefaultBoard board = new DefaultBoard(4, 4);
+        DefaultBoard board = new DefaultBoard(2, 2);
 
         new SwingSupport()
                 .setBoard(board)
