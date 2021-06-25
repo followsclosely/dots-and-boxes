@@ -15,9 +15,9 @@ public class DotsAndBoxesUtils {
     public static Optional<Coordinate> getAnySpotToPlay(final Board board){
 
         //Select a random place on the board
-        //int x = ThreadLocalRandom.current().nextInt(board.getWidth());
-        //int y = ThreadLocalRandom.current().nextInt(board.getHeight());
-        int x = 0, y = 0;
+        int x = ThreadLocalRandom.current().nextInt(board.getWidth());
+        int y = ThreadLocalRandom.current().nextInt(board.getHeight());
+        //int x = 0, y = 0;
 
         //Look for a any valid spot.
         for (int i = 0, width = board.getWidth(); i < width; i++, x = (x + 1) % width) {
@@ -38,9 +38,9 @@ public class DotsAndBoxesUtils {
     public static List<Coordinate> getAnySpotToPlay(final Board board, int returnLimit) {
 
         //Select a random place on the board
-        //int x = ThreadLocalRandom.current().nextInt(board.getWidth());
-        //int y = ThreadLocalRandom.current().nextInt(board.getHeight());
-        int x = 0, y = 0;
+        int x = ThreadLocalRandom.current().nextInt(board.getWidth());
+        int y = ThreadLocalRandom.current().nextInt(board.getHeight());
+        //int x = 0, y = 0;
 
         List<Coordinate> coordinates = new ArrayList<>();
 
@@ -63,10 +63,9 @@ public class DotsAndBoxesUtils {
     public static List<Coordinate> getSafeSpotsToPlay(final Board board, int returnLimit){
 
         //Select a random place on the board
-        //int x = ThreadLocalRandom.current().nextInt(board.getWidth());
-        //int y = ThreadLocalRandom.current().nextInt(board.getHeight());
-
-        int x=0, y=0;
+        int x = ThreadLocalRandom.current().nextInt(board.getWidth());
+        int y = ThreadLocalRandom.current().nextInt(board.getHeight());
+        //int x=0, y=0;
 
         List<Coordinate> coordinates = new ArrayList<>();
 
@@ -86,8 +85,7 @@ public class DotsAndBoxesUtils {
                                 }
                             }
 
-                            if( !closesBox && returnLimit > 0){
-                                returnLimit--;
+                            if( !closesBox && returnLimit-- > 0){
                                 coordinates.add(new Coordinate(x, y, side));
                             }
                         }

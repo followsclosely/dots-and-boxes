@@ -55,25 +55,29 @@ public class SwingSupport {
         //Create the panel that displays the tic tac toe board.
         final DotsAndBoxesPanel boardPanel = new DotsAndBoxesPanel(board);
         boardPanel.addDotsAndBoxesMouseAdapter(new DotsAndBoxesMouseAdapter(turn -> {
-            DefaultBox box = board.getBox(turn.getX(), turn.getY());
-            DefaultLine line = box.getLine(turn.getSide());
-            if( line.getPlayer() == 0) {
-                turns.add(turn);
-                line.setPlayer(PLAYER_COLOR);
-                SwingUtilities.invokeLater(() -> boardPanel.repaint());
-                boolean boxClaimed = false;
-                for (DefaultBox parent : line.getParents()){
-                    if( parent.getNumberOfUnclaimedLines() == 0 ){
-                        parent.setPlayer(PLAYER_COLOR);
-                        boxClaimed = true;
+            if( turn != null) {
+                DefaultBox box = board.getBox(turn.getX(), turn.getY());
+                DefaultLine line = box.getLine(turn.getSide());
+                if( line.getPlayer() == 0) {
+                    turns.add(turn);
+                    line.setPlayer(PLAYER_COLOR);
+                    SwingUtilities.invokeLater(boardPanel::repaint);
+                    boolean boxClaimed = false;
+                    for (DefaultBox parent : line.getParents()) {
+                        if (parent.getNumberOfUnclaimedLines() == 0) {
+                            parent.setPlayer(PLAYER_COLOR);
+                            boxClaimed = true;
+                        }
+                    }
+
+                    SwingUtilities.invokeLater(boardPanel::repaint);
+
+                    if (!boxClaimed) {
+                        new Thread(() -> computersTurn(board, boardPanel)).start();
                     }
                 }
-
-                SwingUtilities.invokeLater(() -> boardPanel.repaint());
-
-                if( !boxClaimed ) {
-                    new Thread(() ->computersTurn(board, boardPanel)).start();
-                }
+            } else {
+                new Thread(() -> computersTurn(board, boardPanel)).start();
             }
         }, board));
 
@@ -92,7 +96,7 @@ public class SwingSupport {
                 }
             }
             line.setPlayer(0);
-            SwingUtilities.invokeLater( () -> boardPanel.repaint());
+            SwingUtilities.invokeLater(boardPanel::repaint);
         }));
         statusPanel.add(undo, BorderLayout.EAST);
 
@@ -117,7 +121,7 @@ public class SwingSupport {
             if( line.getPlayer() == 0) {
                 turns.add(botsPlay);
                 line.setPlayer(COMPUTER_COLOR);
-                SwingUtilities.invokeLater(() -> component.repaint());
+                SwingUtilities.invokeLater(component::repaint);
                 try {
                     Thread.sleep(200);
                 } catch (Exception ignore) {
@@ -132,7 +136,7 @@ public class SwingSupport {
                 }
 
                 if (boxClosed) {
-                    SwingUtilities.invokeLater(() -> component.repaint());
+                    SwingUtilities.invokeLater(component::repaint);
                     computersTurn(board, component);
                 }
             }

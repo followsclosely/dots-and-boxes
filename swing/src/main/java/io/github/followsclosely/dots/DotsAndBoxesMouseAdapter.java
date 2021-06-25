@@ -1,5 +1,6 @@
 package io.github.followsclosely.dots;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -56,39 +57,50 @@ public class DotsAndBoxesMouseAdapter extends MouseAdapter {
 
     @Override
     public synchronized void mouseClicked(MouseEvent event) {
-
-        //Locate the box that contains the event
-        int x = event.getX() / cellWidth;
-        int y = event.getY() / cellHeight;
-
-        int dx = event.getX() - (x*cellWidth);
-        int dy = event.getY() - (y*cellHeight);
-
-        //Locate the location within the box (relative to the upper right) of the event
-        //System.out.println(String.format("cellWidth = %d, cellWidth=%d", this.cellWidth, this.cellWidth));
-        //System.out.println(String.format("Clicking on: [%d,%d] : [%d,%d] -> [%d,%d]", event.getX(), event.getY(), x, y, dx, dy));
-
-        int side = -1;
-
-        if( x != Math.min(x, maxX) ){
-            x = maxX;
-            side = 1;
-        } else if( y != Math.min(y, maxY) ){
-            y = maxY;
-            side = 2;
+        if (SwingUtilities.isLeftMouseButton(event)) {
+            humanTurn(event);
+        } else {
+            humanTurn(null);
         }
-        else {
-            for (int i = 0; i < 4; i++) {
-                if (polygons[i].contains(new Point(dx, dy))) {
-                    side = i;
-                    this.lastClickTranslated = new Coordinate(dx, dy, side);
-                    break;
+    }
+
+    public void humanTurn(MouseEvent event){
+
+        if( event != null) {
+            //Locate the box that contains the event
+            int x = event.getX() / cellWidth;
+            int y = event.getY() / cellHeight;
+
+            int dx = event.getX() - (x * cellWidth);
+            int dy = event.getY() - (y * cellHeight);
+
+            //Locate the location within the box (relative to the upper right) of the event
+            //System.out.println(String.format("cellWidth = %d, cellWidth=%d", this.cellWidth, this.cellWidth));
+            //System.out.println(String.format("Clicking on: [%d,%d] : [%d,%d] -> [%d,%d]", event.getX(), event.getY(), x, y, dx, dy));
+
+            int side = -1;
+
+            if (x != Math.min(x, maxX)) {
+                x = maxX;
+                side = 1;
+            } else if (y != Math.min(y, maxY)) {
+                y = maxY;
+                side = 2;
+            } else {
+                for (int i = 0; i < 4; i++) {
+                    if (polygons[i].contains(new Point(dx, dy))) {
+                        side = i;
+                        this.lastClickTranslated = new Coordinate(dx, dy, side);
+                        break;
+                    }
                 }
             }
-        }
 
-        if ( side != -1) {
-            turnSupport.onTurn(lastClick = new Coordinate(x,y,side));
+            if (side != -1) {
+                turnSupport.onTurn(lastClick = new Coordinate(x, y, side));
+            }
+        } else {
+            turnSupport.onTurn(null);
         }
     }
 

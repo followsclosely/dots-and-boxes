@@ -81,34 +81,55 @@ public class DotsAndBoxesPanel extends JPanel {
                             g.fillRect(x * cellWidth + DOT_DIAMETER /2, y * cellHeight + DOT_DIAMETER /2, cellWidth, cellHeight);
                         }
 
-                        g.setColor(Color.BLACK);
-
                         //Draw the top
                         DefaultLine top = box.getLine(0);
                         //g.setColor(COLORS[top.getPlayer()]);
-                        if( top.getPlayer() > 0)
-                        g.fillRect(x * cellWidth + DOT_DIAMETER, y * cellHeight + (DOT_DIAMETER -barHeight)/2 , cellWidth - DOT_DIAMETER + 2, barHeight);
+                        if( top.getPlayer() > 0) {
+                            g.setColor(Color.BLACK);
+                            g.fillRect(x * cellWidth + DOT_DIAMETER, y * cellHeight + (DOT_DIAMETER - barHeight) / 2, cellWidth - DOT_DIAMETER + 2, barHeight);
+                        }
+                        if( top.getScore() != null){
+                            g.setColor(Color.RED);
+                            g.drawString("" + top.getScore(), x * cellWidth + DOT_DIAMETER + (cellWidth/3), y * cellHeight + DOT_DIAMETER);
+                        }
+
 
                         //Draw the left
                         DefaultLine left = box.getLine(3);
                        // g.setColor(COLORS[left.getPlayer()]);
-                        if( left.getPlayer() > 0)
-                        g.fillRect(x * cellWidth + (DOT_DIAMETER -barHeight)/2, y * cellHeight + DOT_DIAMETER, barHeight, cellHeight - DOT_DIAMETER + 2);
+                        if( left.getPlayer() > 0) {
+                            g.setColor(Color.BLACK);
+                            g.fillRect(x * cellWidth + (DOT_DIAMETER - barHeight) / 2, y * cellHeight + DOT_DIAMETER, barHeight, cellHeight - DOT_DIAMETER + 2);
+                        }
+                        if( left.getScore() != null){
+                            g.setColor(Color.RED);
+                            g.drawString("" + left.getScore(), x * cellWidth + (DOT_DIAMETER - barHeight) / 2, y * cellHeight + (cellHeight/2));
+                        }
+
 
                         //Draw the right
                         if (x == width - 1) {
                             DefaultLine right = box.getLine(1);
                             //g.setColor(COLORS[right.getPlayer()]);
-                            if( right.getPlayer() > 0)
-                            g.fillRect((x + 1) * cellWidth + (DOT_DIAMETER -barHeight)/2, y * cellHeight + DOT_DIAMETER, barHeight, cellHeight - DOT_DIAMETER + 2);
+                            if( right.getPlayer() > 0) {
+                                g.setColor(Color.BLACK);
+                                g.fillRect((x + 1) * cellWidth + (DOT_DIAMETER - barHeight) / 2, y * cellHeight + DOT_DIAMETER, barHeight, cellHeight - DOT_DIAMETER + 2);
+                            }
                         }
+
 
                         //Draw the bottom
                         if (y == height - 1) {
                             DefaultLine bottom = box.getLine(2);
                             //g.setColor(COLORS[bottom.getPlayer()]);
-                            if( bottom.getPlayer() > 0)
-                            g.fillRect(x * cellWidth + DOT_DIAMETER, (y + 1) * cellHeight + (DOT_DIAMETER -barHeight)/2, cellWidth - DOT_DIAMETER + 2, barHeight);
+                            if( bottom.getPlayer() > 0) {
+                                g.setColor(Color.BLACK);
+                                g.fillRect(x * cellWidth + DOT_DIAMETER, (y + 1) * cellHeight + (DOT_DIAMETER - barHeight) / 2, cellWidth - DOT_DIAMETER + 2, barHeight);
+                            }
+                            if( bottom.getScore() != null){
+                                g.setColor(Color.RED);
+                                g.drawString("" + bottom.getScore(), x * cellWidth + DOT_DIAMETER + (cellWidth/3), (y+1) * cellHeight);
+                            }
                         }
                     }
                 }

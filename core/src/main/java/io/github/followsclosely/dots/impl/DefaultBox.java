@@ -5,12 +5,13 @@ import io.github.followsclosely.dots.Box;
 import java.util.Arrays;
 
 public class DefaultBox implements Box {
-    private int player = 0;
+    private int player;
     private DefaultLine[] lines;
 
-    public DefaultBox(DefaultLine... lines) {
+    public DefaultBox(int player, DefaultLine... lines) {
         this.lines = lines;
         Arrays.stream(lines).forEach(line -> line.addParent(this));
+        this.player = player;
     }
 
     @Override

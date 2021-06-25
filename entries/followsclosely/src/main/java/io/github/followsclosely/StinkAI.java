@@ -2,16 +2,15 @@ package io.github.followsclosely;
 
 import io.github.followsclosely.dots.*;
 import io.github.followsclosely.dots.impl.DefaultBoard;
-import io.github.followsclosely.dots.impl.DefaultBox;
-import io.github.followsclosely.dots.impl.DefaultLine;
 import io.github.followsclosely.dots.impl.DotsAndBoxesUtils;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class StinkAI implements ArtificialIntelligence {
 
-    private static int STRATEGY_LIMIT = Integer.MAX_VALUE;
+    private static int STRATEGY_LIMIT = 5;
 
     private int color;
     private int opponent = 1;
@@ -22,12 +21,18 @@ public class StinkAI implements ArtificialIntelligence {
         this.color = color;
     }
 
+    private Engine engine = new Engine();
+
     @Override public int getColor() {
         return color;
     }
 
     @Override
     public Coordinate yourTurn(Board b) {
+
+        if( b instanceof DefaultBoard) {
+            ((DefaultBoard) b).getLines().forEach(l -> l.setScore(null));
+        }
 
         final DefaultBoard board = new DefaultBoard(b);
 
@@ -43,12 +48,48 @@ public class StinkAI implements ArtificialIntelligence {
         {
             //Get all the valid spots to play.
             List<Coordinate> coordinates = DotsAndBoxesUtils.getAnySpotToPlay(board, Integer.MAX_VALUE);
-            for(Coordinate turn : coordinates) {
 
-                //System.out.println(turn + " :simulateRecursiveGame(depth=n/a)...");
+            try {
+                Map<Coordinate, AtomicInteger> values = new HashMap<>(coordinates.size());
+                for (Coordinate turn : coordinates) {
+                    //System.out.println(turn + " :simulateRecursiveGame(depth=n/a)...");
 
-                Map.Entry<Integer, AtomicInteger> results = simulateGame(new DefaultBoard(board), turn, color, opponent);
-                System.out.println( results.getKey() + " : "+results.getValue()+" Blocks Won");
+                    for(int i=0; i<10000; i++) {
+                        Map<Integer, AtomicInteger> results = simulateGame(new DefaultBoard(board), turn, color, opponent);
+                        //System.out.println(color + " " + turn + " : " + results);
+                        Map.Entry<Integer, AtomicInteger> maxEntry = Collections.max(results.entrySet(), Comparator.comparingInt((Map.Entry<Integer, AtomicInteger> e) -> e.getValue().get()));
+                        //System.out.println("maxEntry: " + maxEntry);
+
+
+                        if (maxEntry.getKey() == color) {
+                            //If the A.I won this, then add score to the entry in the map for this Coordinate
+                            values.computeIfAbsent(turn, t -> new AtomicInteger()).addAndGet(maxEntry.getValue().intValue());
+                        } else {
+                            //If the A.I lost this, then subtract the score from the entry in the map for this Coordinate
+                            values.computeIfAbsent(turn, t -> new AtomicInteger()).addAndGet(-maxEntry.getValue().intValue());
+                        }
+                    }
+
+                    //This is a line to assist in debugging the ai.
+                    ((DefaultBoard)b).getBox(turn.getX(), turn.getY()).getLine(turn.getSide()).setScore(values.get(turn).get());
+                }
+
+                System.out.println("values: " + values);
+                //if (values(color)) {
+
+                if ( values.size() > 1) {
+                    Map.Entry<Coordinate, AtomicInteger> maxEntry = Collections.max(values.entrySet(), Comparator.comparingInt((Map.Entry<Coordinate, AtomicInteger> e) -> e.getValue().get()));
+
+                    System.out.println("Returning " + maxEntry.getKey());
+
+                    if (maxEntry.getKey() != null) {
+                        return maxEntry.getKey();
+                    }
+                } else if (values.size() == 1){
+                    return values.entrySet().stream().findFirst().get().getKey();
+                }
+            } catch (Throwable e){
+                e.printStackTrace();
             }
         }
 
@@ -70,7 +111,7 @@ public class StinkAI implements ArtificialIntelligence {
                 if (box.getNumberOfUnclaimedLines() == 1) {
                     for (int side = 0; side < 4; side++) {
                         if (box.getLine(side).getPlayer() == 0) {
-                            return Optional.ofNullable(new Coordinate(x, y, side));
+                            return Optional.of(new Coordinate(x, y, side));
                         }
                     }
                 }
@@ -80,53 +121,37 @@ public class StinkAI implements ArtificialIntelligence {
         return Optional.empty();
     }
 
-    public Map.Entry<Integer, AtomicInteger> simulateGame(DefaultBoard board, Coordinate turn, int color, int opponent){
+    public Map<Integer, AtomicInteger> simulateGame(DefaultBoard board, Coordinate turn, int color, int opponent){
 
-        Map.Entry<Integer, AtomicInteger> results = ( processTurn(board, turn, color) )
-                ? simulateRecursiveGame(board, opponent, color, 1)
-                : simulateRecursiveGame(board, color, opponent, 1);
+        Map<Integer, AtomicInteger> results = ( engine.processTurn(board, turn, color) )
+                ? simulateRecursiveGame(board, color, opponent, 1)
+                : simulateRecursiveGame(board, opponent, color, 1);
 
         return results;
+
+
+//        Map.Entry<Integer, AtomicInteger> maxEntry = Collections.max(counts.entrySet(), Comparator.comparingInt((Map.Entry<Integer, AtomicInteger> e) -> e.getValue().get()));
+//        return maxEntry;
     }
 
-    public Map.Entry<Integer, AtomicInteger> simulateRecursiveGame(DefaultBoard board, int color, int opponent, int depth){
+    public Map<Integer, AtomicInteger> simulateRecursiveGame(DefaultBoard board, int color, int opponent, int depth) {
+
+        //Optional<Coordinate> turn = ( color == this.opponent ) ? closeBoxIfYouCanStrategy(board) : Optional.empty();
+
+        //if( !turn.isPresent()) {
         Optional<Coordinate> turn = DotsAndBoxesUtils.getAnySpotToPlay(board);
+        //}
 
         //System.out.println(turn + " :simulateRecursiveGame(depth="+depth+")...");
 
         if( turn.isPresent() ){
-            return ( processTurn(board, turn.get(), color) )
-                    ? simulateRecursiveGame(board, opponent, color, depth+1)
-                    : simulateRecursiveGame(board, color, opponent, depth+1);
+            return ( engine.processTurn(board, turn.get(), color) )
+                    ? simulateRecursiveGame(board, color, opponent, depth+1)
+                    : simulateRecursiveGame(board, opponent, color, depth+1);
         } else {
-            Map<Integer, AtomicInteger> counts = board.getCounts();
-            Map.Entry<Integer, AtomicInteger> maxEntry = Collections.max(counts.entrySet(), Comparator.comparingInt((Map.Entry<Integer, AtomicInteger> e) -> e.getValue().get()));
-            return maxEntry;
+            return board.getCounts();
         }
     }
 
-    private boolean processTurn(DefaultBoard board, Coordinate turn, int color){
 
-        boolean boxClosed = false;
-
-        DefaultLine line = board.getBox(turn.getX(), turn.getY()).getLine(turn.getSide());
-
-        if( line.getPlayer() == 0) {
-            line.setPlayer(color);
-            //System.out.println(turn + " :processTurn()... claiming line for " + color);
-
-            for (DefaultBox parent : line.getParents()) {
-                if (parent.getNumberOfUnclaimedLines() == 0) {
-                    parent.setPlayer(color);
-                    boxClosed = true;
-                }
-            }
-        } else {
-            System.out.println("Can not claim a spot already taken!");
-        }
-
-
-
-        return boxClosed;
-    }
 }

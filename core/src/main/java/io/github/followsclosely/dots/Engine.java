@@ -49,23 +49,9 @@ public class Engine {
             //System.out.println(player.getClass().getSimpleName() + " : turn = " + turn);
 
             if( turn != null){
-                boolean boxClosed = false;
+                boolean boxClosed = processTurn(board, turn, player.getColor());
 
-                DefaultBox box = board.getBox(turn.getX(), turn.getY());
-                DefaultLine line = box.getLine(turn.getSide());
-
-                if( line.getPlayer() == 0) {
-                    line.setPlayer(player.getColor());
-
-                    for (DefaultBox parent : line.getParents()) {
-                        if (parent.getPlayer() == 0 && parent.getNumberOfUnclaimedLines() == 0) {
-                            parent.setPlayer(player.getColor());
-                            boxClosed = true;
-                        }
-                    }
-                }
-
-                if( !boxClosed){
+                if( !boxClosed ){
                     player = (player==ai0) ? ai1 : ai0;
                 }
             }
@@ -80,5 +66,27 @@ public class Engine {
         Entry<Integer, AtomicInteger> maxEntry = Collections.max(counts.entrySet(), Comparator.comparingInt((Entry<Integer, AtomicInteger> e) -> e.getValue().get()));
 
         return maxEntry.getKey();
+    }
+
+    public boolean processTurn(DefaultBoard board, Coordinate turn, int color){
+
+        boolean boxClosed = false;
+
+        DefaultLine line = board.getBox(turn.getX(), turn.getY()).getLine(turn.getSide());
+
+        if( line.getPlayer() == 0) {
+            line.setPlayer(color);
+
+            for (DefaultBox parent : line.getParents()) {
+                if (parent.getNumberOfUnclaimedLines() == 0) {
+                    parent.setPlayer(color);
+                    boxClosed = true;
+                }
+            }
+        } else {
+            System.out.println("Can not claim a spot already taken!");
+        }
+
+        return boxClosed;
     }
 }
